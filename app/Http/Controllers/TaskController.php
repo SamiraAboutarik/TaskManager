@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\TaskRequest;
 use App\Models\Task;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -13,36 +12,29 @@ class TaskController extends Controller
     /**
      * Display a listing of tasks with filtering, search and pagination.
      */
-    public function index(Request $request): View
-    {
-        $query = Task::query()->latest();
+public function index(Request $request): View
+{
+    $tasks = Task::query()
+        ->when($request->filled('status'), fn($q) => $q->where('status', $request->status))
+        ->when($request->filled('search'), fn($q) => $q->where('title', 'like', '%' . $request->search . '%'))
+        ->latest()
+        ->paginate(5)
+        ->withQueryString();
 
-        // Filter by status
-        if ($request->filled('status') && in_array($request->status, ['todo', 'in_progress', 'done'])) {
-            $query->byStatus($request->status);
-        }
+    $statusCounts = [
+        'all'         => Task::count(),
+        'todo'        => Task::where('status', 'todo')->count(),
+        'in_progress' => Task::where('status', 'in_progress')->count(),
+        'done'        => Task::where('status', 'done')->count(),
+    ];
 
-        // Search by title
-        if ($request->filled('search')) {
-            $query->search($request->search);
-        }
-
-        $tasks = $query->paginate(5);
-
-        $statusCounts = [
-            'all'         => Task::count(),
-            'todo'        => Task::byStatus('todo')->count(),
-            'in_progress' => Task::byStatus('in_progress')->count(),
-            'done'        => Task::byStatus('done')->count(),
-        ];
-
-        return view('tasks.index', compact('tasks', 'statusCounts'));
-    }
+    return view('tasks.index', compact('tasks', 'statusCounts'));
+}
 
     /**
      * Show the form for creating a new task.
      */
-    public function create(): View
+    public function create()
     {
         return view('tasks.create');
     }
@@ -50,7 +42,7 @@ class TaskController extends Controller
     /**
      * Store a newly created task.
      */
-    public function store(TaskRequest $request): RedirectResponse
+    public function store(TaskRequest $request)
     {
         Task::create($request->validated());
 
@@ -70,7 +62,7 @@ class TaskController extends Controller
     /**
      * Update the specified task.
      */
-    public function update(TaskRequest $request, Task $task): RedirectResponse
+    public function update(TaskRequest $request, Task $task)
     {
         $task->update($request->validated());
 
@@ -82,7 +74,7 @@ class TaskController extends Controller
     /**
      * Remove the specified task.
      */
-    public function destroy(Task $task): RedirectResponse
+    public function destroy(Task $task)
     {
         $task->delete();
 
@@ -94,7 +86,7 @@ class TaskController extends Controller
     /**
      * Mark task as done (bonus feature – one click).
      */
-    public function markDone(Task $task): RedirectResponse
+    public function markDone(Task $task)
     {
         $task->update(['status' => 'done']);
 

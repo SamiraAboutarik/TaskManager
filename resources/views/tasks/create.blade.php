@@ -1,35 +1,30 @@
 @extends('layouts.app')
-
 @section('title', 'Nouvelle tâche')
 
 @section('content')
 
-{{-- Breadcrumb --}}
-<div class="mb-4" style="display:flex; align-items:center; gap:.5rem; color:var(--muted); font-size:.85rem;">
-    <a href="{{ route('tasks.index') }}" style="color:var(--muted); text-decoration:none;">
-        <i class="bi bi-arrow-left me-1"></i> Mes tâches
+<div class="mb-3">
+    <a href="{{ route('tasks.index') }}" class="text-decoration-none text-muted">
+        <i class="bi bi-arrow-left me-1"></i> Retour à la liste
     </a>
-    <span>/</span>
-    <span style="color:var(--text)">Nouvelle tâche</span>
 </div>
 
-<h1 class="page-title mb-4">Nouvelle tâche</h1>
-
-<div class="card-surface" style="max-width: 720px;">
-    <form method="POST" action="{{ route('tasks.store') }}" novalidate>
-        @csrf
-
-        @include('tasks._form')
-
-        <div class="d-flex gap-2 mt-4 pt-3" style="border-top: 1px solid var(--border);">
-            <button type="submit" class="btn-accent" style="padding:.6rem 1.5rem; font-size:.9rem;">
-                <i class="bi bi-plus-lg me-1"></i> Créer la tâche
-            </button>
-            <a href="{{ route('tasks.index') }}" class="btn-ghost" style="text-decoration:none; padding:.6rem 1.2rem; font-size:.9rem;">
-                Annuler
-            </a>
-        </div>
-    </form>
+<div class="card" style="max-width: 680px;">
+    <div class="card-header">
+        <h5 class="mb-0 fw-bold">Nouvelle tâche</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ route('tasks.store') }}">
+            @csrf
+            @include('tasks._form')
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i> Créer
+                </button>
+                <a href="{{ route('tasks.index') }}" class="btn btn-outline-secondary">Annuler</a>
+            </div>
+        </form>
+    </div>
 </div>
 
 @endsection
